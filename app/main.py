@@ -51,6 +51,7 @@ class AsyncRedisRepository:
             logger.error("Ошибка при удалении user: %s", str(e))
             raise e
 
+
 async def main():
     repository = AsyncRedisRepository()
 
@@ -58,6 +59,7 @@ async def main():
     await repository.get_user(1)
     await repository.delete_user(1)
     await repository.get_user(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
