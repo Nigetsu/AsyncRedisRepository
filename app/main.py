@@ -6,18 +6,19 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 class AsyncRedisRepository:
     def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0):
         self.redis_client = redis.Redis(host=host, port=port, db=db)
 
-    async def set_user(self, user_id: int, full_name: str):
+    async def set_user(self, user_id: int, full_name: str) -> None:
         key = f"user:{user_id}"
 
         try:
             await self.redis_client.set(key, full_name)
-            logger.info(f"Успешно добавлен пользователь {user_id}: {full_name}")
+            logger.info("Успешно добавлен пользователь %s: %s", user_id, full_name)
         except RedisError as e:
-            logger.error(f"Ошибка при отправике данныx: {str(e)}")
+            logger.error("Ошибка при отправике данныx: %s", str(e))
             raise e
 
     async def get_user(self, user_id: int) -> str | None:
@@ -25,13 +26,14 @@ class AsyncRedisRepository:
 
         try:
             res = await self.redis_client.get(key)
-            if res:
-                logger.info(f"Успешно получен пользователь {user_id}")
+            if res is not None:
+                logger.info("Успешно получен пользователь %s", user_id)
                 return res.decode("utf-8")
-            logger.info(f"Пользователь {user_id} не найден")
-            return None
+            else:
+                logger.info("Пользователь %s не найден", user_id)
+                return None
         except RedisError as e:
-            logger.error(f"Ошибка при получении user: {str(e)}")
+            logger.error("Ошибка при получении пользователя: %s", str(e))
             raise e
 
     async def delete_user(self, user_id: int) -> bool:
@@ -41,12 +43,12 @@ class AsyncRedisRepository:
             res = await self.redis_client.delete(key)
             deleted_user = bool(res)
             if deleted_user:
-                logger.info(f"Успешно удален пользователь {user_id}")
+                logger.info("Успешно удален пользователь %s", user_id)
             else:
-                logger.info(f"Пользователь {user_id} не найден")
+                logger.info("Пользователь %s не найден", user_id)
             return deleted_user
         except RedisError as e:
-            logger.error(f"Ошибка при удалении user: {str(e)}")
+            logger.error("Ошибка при удалении user: %s", str(e))
             raise e
 
 async def main():
